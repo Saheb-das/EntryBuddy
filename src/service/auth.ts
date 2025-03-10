@@ -2,15 +2,16 @@
 import createHttpError from "http-errors";
 
 // internal imports
-import userService from "../service/user";
+import societyRepository from "../repository/society";
+import userRepository from "../repository/user";
 import emailService from "../service/email";
 import { compareHashedPassword, genHashedPassword } from "../lib/password";
-import { genSocietyId } from "../utils/generateIdAndOTP";
+import { genSelfIdForSociety } from "../utils/generateIdAndOTP";
 
 // types import
 import { TLoginUser, TRegisterUser } from "../types/userTypes";
 import { TUser, UserType } from "../model/user";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 
 // register service
 async function register(
@@ -20,18 +21,27 @@ async function register(
     throw createHttpError(400, "data is required");
   }
 
-  const userProfile = await userService.createUserProfile(userData.role);
-  if (!userProfile) {
-    throw createHttpError(500, "user profile is not created");
+  const newSociety = await societyRepository.create(
+    userData.societyName.trim()
+  );
+  if (!newSociety) {
+    throw createHttpError(500, "society is not created");
   }
 
   const hashedPassword = await genHashedPassword(userData.password);
-  const newSocietyId = genSocietyId(
+  if (!hashedPassword) {
+    throw createHttpError(500, "password is not hashed");
+  }
+
+  const newSelfId = genSelfIdForSociety(
     userData.role,
     userData.firstName,
     userData.lastName,
-    "Hiland Park"
+    userData.societyName
   );
+  if (!newSelfId) {
+    throw createHttpError(500, "self id for society is not created");
+  }
 
   const userPayload: TUser = {
     firstName: userData.firstName,
@@ -41,28 +51,18 @@ async function register(
     phoneNo: userData.phoneNo,
     gender: userData.gender,
     role: userData.role,
-    societyId: newSocietyId,
+    selfId: newSelfId,
     occupation: userData.occupation,
-    documents: {
-      identity: {
-        docName: userData.identityDocName,
-        docImg: userData.identityDocImg,
-      },
-      society: {
-        docName: userData.societyPropertyDoc,
-        docImg: userData.societyPropertyDocImg,
-      },
-    },
-    profile: userProfile._id,
+    society: newSociety._id,
   };
 
-  const newUser = await userService.createUser(userPayload);
+  const newUser = await userRepository.create(userPayload);
   if (!newUser) {
     throw createHttpError(500, "user not created");
   }
 
   // mail service
-  await emailService.sendSocietyId(newUser.email, newSocietyId);
+  await emailService.sendSocietyId(newUser.email, newSelfId);
 
   return newUser;
 }
@@ -71,14 +71,21 @@ async function register(
 async function login(
   userData: TLoginUser
 ): Promise<HydratedDocument<UserType>> {
+  let typedSelfId: Types.ObjectId | null = null;
+
   if (!userData) {
     throw createHttpError(400, "data is required");
   }
 
-  const user = await userService.getUserByEmailAndSociety(
+  if (typeof userData.selfId === "string") {
+    typedSelfId = new Types.ObjectId(userData.selfId);
+  }
+
+  const user = await userRepository.findByEmailAndSelfId(
     userData.email,
-    userData.societyId
+    typedSelfId!
   );
+
   if (!user) {
     throw createHttpError(404, "user not found");
   }
@@ -86,41 +93,8 @@ async function login(
   return user;
 }
 
-// forgot password service
-async function forgotPassword(
-  email: string,
-  societyId: string,
-  newPassword: string
-): Promise<boolean> {
-  const user = await userService.getUserByEmailAndSociety(email, societyId);
-  if (!user) {
-    throw createHttpError(404, "user not found");
-  }
-
-  const hashedPassword = await genHashedPassword(newPassword);
-
-  const updatedUser = await userService.changePassword(
-    user._id,
-    hashedPassword
-  );
-  if (!updatedUser) {
-    throw createHttpError(404, "user not found");
-  }
-
-  const isValid = await compareHashedPassword(
-    newPassword,
-    updatedUser.password || ""
-  );
-  if (!isValid) {
-    throw createHttpError(304, "password is not modified");
-  }
-
-  return isValid;
-}
-
 // export
 export default {
   register,
   login,
-  forgotPassword,
 };

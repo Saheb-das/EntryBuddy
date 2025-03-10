@@ -7,8 +7,7 @@ export interface AuthRequest<ReqBody = {}, Params = {}, Query = {}>
   authUser?: {
     _id: Types.ObjectId;
     role: "admin" | "resident" | "guard";
-    societyId: string;
+    societyId: Types.ObjectId;
     email: string;
-    profileId: Types.ObjectId;
   };
 }

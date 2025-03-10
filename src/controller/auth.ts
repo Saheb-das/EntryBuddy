@@ -66,31 +66,8 @@ async function login(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// forgot-password controller
-async function forgotPassword(req: Request, res: Response, next: NextFunction) {
-  const { email, societyId, newPassword } = req.body;
-
-  try {
-    const isModified = await authService.forgotPassword(
-      email,
-      societyId,
-      newPassword
-    );
-    if (!isModified) {
-      throw createHttpError(304, "user not modified");
-    }
-
-    res
-      .status(200)
-      .json({ success: true, message: "password change successfully" });
-  } catch (error) {
-    next(error);
-  }
-}
-
 // export
 export default {
   register,
   login,
-  forgotPassword,
 };

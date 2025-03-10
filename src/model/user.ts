@@ -34,10 +34,8 @@ const userSchema = new Schema(
       enum: ["admin", "resident", "guard"],
       required: true,
     },
-    societyId: {
-      type: String,
-      required: true,
-    },
+    selfId: { type: String, required: true },
+    society: { type: Schema.Types.ObjectId, ref: "Society", requried: true },
     occupation: {
       type: String,
       required: true,

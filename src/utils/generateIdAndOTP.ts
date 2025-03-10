@@ -18,7 +18,7 @@ function generateRandom() {
 type Role = "resident" | "guard" | "admin";
 
 // generate dynamically Society-Id for all type users
-function genSocietyId(
+function genSelfIdForSociety(
   role: Role,
   firstName: string,
   lastName: string,
@@ -36,7 +36,9 @@ function genSocietyId(
   const shortName = firstName[0] + lastName[0];
   const ranStr = generateRandom();
 
-  return `${AprtName}-${slot[role]}-${shortName.toUpperCase()}-${ranStr}`;
+  return `${AprtName.toUpperCase()}-${
+    slot[role]
+  }-${shortName.toUpperCase()}-${ranStr}`;
 }
 
 // generate initial password when all typed user is created
@@ -70,4 +72,4 @@ function genVerifyToken() {
 }
 
 // exports
-export { genSocietyId, genInitialPass, genVerifyToken };
+export { genSelfIdForSociety, genInitialPass, genVerifyToken };
