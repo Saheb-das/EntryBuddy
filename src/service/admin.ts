@@ -72,16 +72,6 @@ async function createUserByAdmin(
     role: userData.role,
     societyId: newSocietyId,
     occupation: userData.occupation,
-    documents: {
-      identity: {
-        docName: userData.identityDocName,
-        docImg: userData.identityDocImg,
-      },
-      society: {
-        docName: userData.societyPropertyDoc,
-        docImg: userData.societyPropertyDocImg,
-      },
-    },
     profile: newUserProfile._id,
   };
 

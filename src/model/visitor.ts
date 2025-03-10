@@ -29,10 +29,6 @@ const visitorSchema = new Schema({
     type: String,
     required: true,
   },
-  selfie: {
-    type: String,
-    required: true,
-  },
   address: {
     type: String,
     required: true,

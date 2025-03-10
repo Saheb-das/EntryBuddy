@@ -13,13 +13,9 @@ const appointmentSchema = new Schema(
       ref: "Visitor",
     },
     purpose: String,
-    timeSlot: {
-      type: String,
-      required: true,
-    },
     eventDate: { type: String, requried: true },
     permissionOTP: { type: Number, required: true },
-    verifyOTP: { type: Boolean, required: true },
+    isVerified: { type: Boolean, required: true },
   },
   { timestamps: true }
 );

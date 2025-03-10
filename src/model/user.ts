@@ -42,33 +42,6 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    documents: {
-      identity: {
-        docName: {
-          type: String,
-          enum: ["andhar", "voter", "passport"],
-          required: true,
-        },
-        docImg: {
-          type: String,
-          required: true,
-        },
-      },
-      society: {
-        docName: {
-          type: String,
-          required: true,
-        },
-        docImg: {
-          type: String,
-          required: true,
-        },
-      },
-    },
-    profile: {
-      type: Schema.Types.ObjectId,
-      ref: "role",
-    },
   },
   { timestamps: true }
 );

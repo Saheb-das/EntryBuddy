@@ -13,12 +13,4 @@ export const userSchema = z.object({
   societyName: z.string().min(6, "society name is required"),
   role: z.enum(["admin", "resident", "guard"]),
   occupation: z.string().min(1, "Occupation is required"),
-  identityDocName: z.enum(["andhar", "voter", "passport"]),
-  identityDocImg: z.string().min(1, "Identity document image is required"),
-  societyPropertyDoc: z
-    .string()
-    .min(1, "Society property document name is required"),
-  societyPropertyDocImg: z
-    .string()
-    .min(1, "Society property document image is required"),
 });
