@@ -47,7 +47,41 @@ async function createUser(
 async function getUsers(): Promise<void> {}
 
 async function getUser(): Promise<void> {}
-async function getUsersByRole(): Promise<void> {}
+
+async function getUsersByRole(
+  req: AuthRequest<{}, {}, { role: "resident" | "guard" | "admin" }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  const { role } = req.query;
+  console.log("role", role);
+
+  try {
+    if (!req.authUser) {
+      throw createHttpError(401, "unauthorized user");
+    }
+
+    if (!req.authUser.societyId) {
+      throw createHttpError(500, "society id not found");
+    }
+
+    const societyId = req.authUser.societyId;
+
+    const users = await userService.getUsersByRole(role, societyId);
+    if (!users) {
+      throw createHttpError(500, "users not found");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "user fetched successfully",
+      users: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function getUserByEmailAndSelfId(): Promise<void> {}
 
 async function changePassword(

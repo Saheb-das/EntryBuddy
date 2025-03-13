@@ -1,7 +1,7 @@
 // external import
 import { z } from "zod";
 
-const passwordValidation = z
+export const passwordValidation = z
   .string()
   .min(8)
   .regex(

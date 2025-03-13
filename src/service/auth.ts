@@ -58,6 +58,7 @@ async function register(
     selfId: newSelfId,
     occupation: userData.occupation,
     society: newSociety._id,
+    appointments: [],
   };
 
   const newUser = await userRepository.create(userPayload);
@@ -75,7 +76,10 @@ async function register(
   }
 
   // mail service
-  await emailService.sendSocietyId(newUser.email, newSelfId);
+  const mail = await emailService.sendSelfId(newUser.email, newSelfId);
+  if (!mail?.messageId) {
+    throw createHttpError(500, "Email not sent");
+  }
 
   return newUser;
 }

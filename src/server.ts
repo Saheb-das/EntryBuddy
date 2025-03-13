@@ -3,6 +3,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import cors from "cors";
 
 // internal imports
 import { globalErrorHandler, noMatchRoute } from "./lib/error";
@@ -13,9 +14,16 @@ const app = express();
 dotenv.config();
 
 // middleware
+
+app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/test", (req, res) => {
+  console.log("Query Received:", req.query);
+  res.send({ received: req.query });
+});
 
 // health route
 app.use("/health", (_req, res) => {

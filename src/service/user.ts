@@ -4,9 +4,10 @@ import createHttpError from "http-errors";
 // internal import
 import userRepository from "../repository/user";
 import societyRepository from "../repository/society";
-import { genInitialPass, genSelfIdForSociety } from "../utils/generateIdAndOTP";
+import { genSelfIdForSociety } from "../utils/generateIdAndOTP";
 import { compareHashedPassword, genHashedPassword } from "../lib/password";
 import { convertToObjectId } from "../lib/convertIdType";
+import emailService from "./email";
 
 // types import
 import { TUser, UserType } from "../model/user";
@@ -30,8 +31,7 @@ async function createUser(
     society.name
   );
 
-  const initPassword = genInitialPass();
-  const hashedPassword = await genHashedPassword(initPassword);
+  const hashedPassword = await genHashedPassword(userData.password);
   if (!hashedPassword) {
     throw createHttpError(500, "password not hashed");
   }
@@ -62,6 +62,12 @@ async function createUser(
   );
   if (!updatedSociety) {
     throw createHttpError(500, "society not updated");
+  }
+
+  // self-id send via email
+  const mail = await emailService.sendSelfId(newUser.email, newSelfId);
+  if (!mail?.messageId) {
+    throw createHttpError(500, "email not sent");
   }
 
   return newUser;

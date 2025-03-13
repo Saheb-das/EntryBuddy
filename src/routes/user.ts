@@ -4,12 +4,18 @@ import express from "express";
 // internal imports
 import userController from "../controller/user";
 import { authorizeRole } from "../middleware/checkPermission";
+import { authenticate } from "../middleware/authenticate";
 
 // create router
 const router = express.Router();
 
 // routes
-router.post("/", authorizeRole(["admin"]), userController.createUser);
+router.post(
+  "/",
+
+  authorizeRole(["admin"]),
+  userController.createUser
+);
 
 router.post(
   "/change-password",
@@ -19,9 +25,9 @@ router.post(
 
 router.get("/", userController.getUsers);
 
-router.get("/:userId", userController.getUser);
+router.get("/role", userController.getUsersByRole);
 
-router.get("/", userController.getUsersByRole);
+router.get("/:userId", userController.getUser);
 
 router.patch("/:userId", userController.updateUser);
 

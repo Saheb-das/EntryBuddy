@@ -23,6 +23,28 @@ async function createTransporter() {
   }
 }
 
+async function sendSelfId(recieverEmail: string, selfId: string) {
+  const transporter = await createTransporter();
+  if (!transporter) {
+    console.log("Cannot send email, transporter not available.");
+    return;
+  }
+
+  const info = await transporter.sendMail({
+    from: `"EntryBuddy Developer 👻" <testmodedevelopment111@gmail.com>`, // sender address
+    to: `${recieverEmail}`, // recipient email
+    subject: "Your Society Residence ID", // Subject line
+    text: "Welcome to your new society! Your residence ID has been generated.", // plain text body
+    html: `<h3>Welcome to Your New Society!</h3>
+           <p><b>Residence ID</b>: ${selfId}</p>
+           <br />
+           <p><b>Note:</b> Please keep this ID safe as it will be required for verification at the society gate.</p>
+    `,
+  });
+
+  return info;
+}
+
 // this mail for visitor to confirmation booked appointment with permission OTP
 async function confirmMailToVisitor(recieverEmail: string, permitOTP: number) {
   const transporter = await createTransporter();
@@ -67,6 +89,7 @@ async function denyMailToVisitor(recieverEmail: string) {
 }
 
 export default {
+  sendSelfId,
   confirmMailToVisitor,
   denyMailToVisitor,
 };
