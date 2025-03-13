@@ -10,7 +10,7 @@ export function globalErrorHandler(
   _next: NextFunction
 ) {
   let statusCode = 500;
-  let errMsg = "Internal server error";
+  let errMsg = err || "Internal server error";
 
   if (isHttpError(err)) {
     statusCode = err.status;

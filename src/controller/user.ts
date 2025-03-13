@@ -44,7 +44,21 @@ async function createUser(
   }
 }
 
+async function getUsers(): Promise<void> {}
+
+async function getUser(): Promise<void> {}
+async function getUsersByRole(): Promise<void> {}
+async function getUserByEmailAndSelfId(): Promise<void> {}
+async function updateUser(): Promise<void> {}
+async function deleteUser(): Promise<void> {}
+
 // export
 export default {
   createUser,
+  getUser,
+  getUsers,
+  getUserByEmailAndSelfId,
+  getUsersByRole,
+  updateUser,
+  deleteUser,
 };

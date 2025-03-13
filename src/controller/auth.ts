@@ -17,7 +17,7 @@ async function register(req: Request, res: Response, next: NextFunction) {
       throw createHttpError(400, "invalid data");
     }
 
-    const newUser = await authService.register(userData);
+    const newUser = await authService.register(isValidData.data);
     if (!newUser) {
       throw createHttpError(500, "user not created");
     }
@@ -39,7 +39,7 @@ async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const isValidData = loginSchema.safeParse(userData);
     if (!isValidData.success) {
-      throw createHttpError(400, "invalid data");
+      throw createHttpError(400, isValidData.error.message);
     }
 
     const loggedInUser = await authService.login(userData);

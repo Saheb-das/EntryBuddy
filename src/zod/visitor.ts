@@ -11,6 +11,5 @@ export const visitorSchema = z.object({
     .regex(/^\d{10}$/, "Phone number must only contain digits"),
   gender: z.enum(["male", "female", "other"]),
   occupation: z.string().min(1, "Occupation is required"),
-  selfie: z.string(),
   address: z.string().min(6, "atleast  6 character required"),
 });

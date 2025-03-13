@@ -32,12 +32,15 @@ export async function authenticate(
       throw createHttpError(404, "user not found");
     }
 
+    if (!isExistUser.society) {
+      throw createHttpError("500", "society id required");
+    }
+
     req.authUser = {
       _id: isExistUser._id,
       role: isExistUser.role,
-      societyId: isExistUser.societyId,
+      societyId: isExistUser.society,
       email: isExistUser.email,
-      profileId: isExistUser.profile!,
     };
 
     next();

@@ -6,6 +6,7 @@ import userRepository from "../repository/user";
 import societyRepository from "../repository/society";
 import { genInitialPass, genSelfIdForSociety } from "../utils/generateIdAndOTP";
 import { genHashedPassword } from "../lib/password";
+import { convertToObjectId } from "../lib/convertIdType";
 
 // types import
 import { TUser, UserType } from "../model/user";
@@ -46,11 +47,21 @@ async function createUser(
     password: hashedPassword,
     selfId: newSelfId,
     society: society._id,
+    appointments: [],
   };
 
   const newUser = await userRepository.create(userPayload);
   if (!newUser) {
     throw createHttpError(500, "user is not created");
+  }
+
+  // push userId in Society
+  const updatedSociety = await societyRepository.addUserToSociety(
+    newUser._id,
+    society._id
+  );
+  if (!updatedSociety) {
+    throw createHttpError(500, "society not updated");
   }
 
   return newUser;
@@ -60,23 +71,17 @@ async function createUser(
 async function getUserById(
   id: Types.ObjectId | string
 ): Promise<HydratedDocument<UserType> | null> {
-  if (typeof id === "string") {
-    id = new Types.ObjectId(id);
-  }
+  const conId = convertToObjectId(id);
 
-  const user = await userRepository.findById(id);
+  const user = await userRepository.findById(conId);
   return user;
 }
 
 // get user by property
 async function getUserByEmailAndSelfId(
   email: string,
-  selfId: string | Types.ObjectId
+  selfId: string
 ): Promise<HydratedDocument<UserType> | null> {
-  if (typeof selfId === "string") {
-    selfId = new Types.ObjectId(selfId);
-  }
-
   const user = await userRepository.findByEmailAndSelfId(email, selfId);
 
   return user;
@@ -84,9 +89,16 @@ async function getUserByEmailAndSelfId(
 
 // get users by role
 async function getUsersByRole(
-  role: "resident" | "guard" | "admin"
+  role: "resident" | "guard" | "admin",
+  societyId: Types.ObjectId | string
 ): Promise<HydratedDocument<UserType>[] | null> {
-  const users = await userRepository.findByRole(role);
+  const conSocId = convertToObjectId(societyId);
+
+  const users = await userRepository.findByRole(role, conSocId);
+  if (!users) {
+    throw createHttpError(404, "users not found");
+  }
+
   return users;
 }
 

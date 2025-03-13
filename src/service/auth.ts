@@ -11,7 +11,7 @@ import { genSelfIdForSociety } from "../utils/generateIdAndOTP";
 // types import
 import { TLoginUser, TRegisterUser } from "../types/userTypes";
 import { TUser, UserType } from "../model/user";
-import { HydratedDocument, Types } from "mongoose";
+import { HydratedDocument } from "mongoose";
 
 // register service
 async function register(
@@ -21,9 +21,13 @@ async function register(
     throw createHttpError(400, "data is required");
   }
 
-  const newSociety = await societyRepository.create(
-    userData.societyName.trim()
-  );
+  const societyPayload = {
+    name: userData.societyName.trim().toLowerCase(),
+    users: [],
+    appointments: [],
+  };
+
+  const newSociety = await societyRepository.create(societyPayload);
   if (!newSociety) {
     throw createHttpError(500, "society is not created");
   }
@@ -61,6 +65,15 @@ async function register(
     throw createHttpError(500, "user not created");
   }
 
+  // push userId in Society
+  const updatedSociety = await societyRepository.addUserToSociety(
+    newUser._id,
+    newSociety._id
+  );
+  if (!updatedSociety) {
+    throw createHttpError(500, "society not updated");
+  }
+
   // mail service
   await emailService.sendSocietyId(newUser.email, newSelfId);
 
@@ -71,23 +84,29 @@ async function register(
 async function login(
   userData: TLoginUser
 ): Promise<HydratedDocument<UserType>> {
-  let typedSelfId: Types.ObjectId | null = null;
-
   if (!userData) {
     throw createHttpError(400, "data is required");
   }
 
-  if (typeof userData.selfId === "string") {
-    typedSelfId = new Types.ObjectId(userData.selfId);
-  }
-
   const user = await userRepository.findByEmailAndSelfId(
     userData.email,
-    typedSelfId!
+    userData.selfId
   );
 
   if (!user) {
     throw createHttpError(404, "user not found");
+  }
+
+  if (!user.password) {
+    throw createHttpError(404, "user has no password");
+  }
+
+  const isValidPass = await compareHashedPassword(
+    userData.password,
+    user.password
+  );
+  if (!isValidPass) {
+    throw createHttpError(401, "invalid credential");
   }
 
   return user;

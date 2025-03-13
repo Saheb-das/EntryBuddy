@@ -62,7 +62,7 @@ function genInitialPass() {
 }
 
 // generate verify token-(6 digit number) to change forgot password
-function genVerifyToken() {
+function genOTP() {
   let store = "";
   for (let i = 0; i < 6; i++) {
     store += Math.floor(Math.random() * 10).toString();
@@ -72,4 +72,4 @@ function genVerifyToken() {
 }
 
 // exports
-export { genSelfIdForSociety, genInitialPass, genVerifyToken };
+export { genSelfIdForSociety, genInitialPass, genOTP };
