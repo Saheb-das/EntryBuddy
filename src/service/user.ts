@@ -5,7 +5,7 @@ import createHttpError from "http-errors";
 import userRepository from "../repository/user";
 import societyRepository from "../repository/society";
 import { genInitialPass, genSelfIdForSociety } from "../utils/generateIdAndOTP";
-import { genHashedPassword } from "../lib/password";
+import { compareHashedPassword, genHashedPassword } from "../lib/password";
 import { convertToObjectId } from "../lib/convertIdType";
 
 // types import
@@ -102,10 +102,52 @@ async function getUsersByRole(
   return users;
 }
 
+async function changePassword(
+  id: Types.ObjectId,
+  oldPassword: string,
+  newPassword: string
+): Promise<HydratedDocument<UserType> | null> {
+  const userId = convertToObjectId(id);
+
+  const isExistUser = await userRepository.findById(userId);
+  if (!isExistUser) {
+    throw createHttpError(404, "user not found");
+  }
+
+  if (!isExistUser.password) {
+    throw createHttpError(404, "user password not found");
+  }
+
+  const isValidPass = await compareHashedPassword(
+    oldPassword,
+    isExistUser.password
+  );
+  if (!isValidPass) {
+    throw createHttpError(400, "invalid password");
+  }
+
+  const hashedNewPassword = await genHashedPassword(newPassword);
+  if (!hashedNewPassword) {
+    throw createHttpError(500, "password not hashed");
+  }
+
+  const updatedUser = await userRepository.update(
+    userId,
+    "password",
+    hashedNewPassword
+  );
+  if (!updatedUser) {
+    throw createHttpError(500, "user not updated");
+  }
+
+  return updatedUser;
+}
+
 // export
 export default {
   createUser,
   getUserById,
   getUserByEmailAndSelfId,
   getUsersByRole,
+  changePassword,
 };

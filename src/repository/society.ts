@@ -5,6 +5,16 @@ import Society, { TSociety } from "../model/society";
 import { HydratedDocument, Types } from "mongoose";
 import { SocietyType } from "../model/society";
 
+async function findAll(): Promise<HydratedDocument<SocietyType>[] | null> {
+  try {
+    const societies = await Society.find().exec();
+    return societies;
+  } catch (error) {
+    console.log("Error finding society");
+    return null;
+  }
+}
+
 async function findById(
   id: Types.ObjectId
 ): Promise<HydratedDocument<SocietyType> | null> {
@@ -98,6 +108,7 @@ async function pullUpdate(
 
 // export
 export default {
+  findAll,
   findById,
   create,
   addUserToSociety,

@@ -49,6 +49,39 @@ async function getUsers(): Promise<void> {}
 async function getUser(): Promise<void> {}
 async function getUsersByRole(): Promise<void> {}
 async function getUserByEmailAndSelfId(): Promise<void> {}
+
+async function changePassword(
+  req: AuthRequest<{ oldPassword: string; newPassword: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    if (!req.authUser) {
+      throw createHttpError(401, "unauthorized user");
+    }
+
+    const userId = req.authUser._id;
+
+    const updatedUser = await userService.changePassword(
+      userId,
+      oldPassword,
+      newPassword
+    );
+    if (!updatedUser) {
+      throw createHttpError(500, "user password not updated");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "user updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 async function updateUser(): Promise<void> {}
 async function deleteUser(): Promise<void> {}
 
@@ -59,6 +92,7 @@ export default {
   getUsers,
   getUserByEmailAndSelfId,
   getUsersByRole,
+  changePassword,
   updateUser,
   deleteUser,
 };

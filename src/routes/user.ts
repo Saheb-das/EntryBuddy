@@ -11,6 +11,12 @@ const router = express.Router();
 // routes
 router.post("/", authorizeRole(["admin"]), userController.createUser);
 
+router.post(
+  "/change-password",
+  authorizeRole(["resident, admin, guard"]),
+  userController.changePassword
+);
+
 router.get("/", userController.getUsers);
 
 router.get("/:userId", userController.getUser);
