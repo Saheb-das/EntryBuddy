@@ -23,6 +23,7 @@ export const registerSchema = z.object({
   role: z.enum(["admin"]),
   occupation: z.string().min(1, "Occupation is required"),
   societyName: z.string().min(3, "minimum 3 charecter required"),
+  societyAddress: z.string().min(3, "minimum 3 charecter required"),
 });
 
 // login schema from client

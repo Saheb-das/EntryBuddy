@@ -23,6 +23,7 @@ async function register(
 
   const societyPayload = {
     name: userData.societyName.trim().toLowerCase(),
+    location: userData.societyAddress.trim().toLowerCase(),
     users: [],
     appointments: [],
   };

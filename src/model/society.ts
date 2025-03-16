@@ -5,6 +5,7 @@ import { Schema, model, InferSchemaType } from "mongoose";
 const societySchema = new Schema(
   {
     name: { type: String, required: true },
+    location: { type: String, required: true },
     users: [
       {
         type: Schema.Types.ObjectId,
